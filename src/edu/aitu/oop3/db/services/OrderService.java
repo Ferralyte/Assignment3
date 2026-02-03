@@ -1,19 +1,14 @@
 package edu.aitu.oop3.db.services;
 
-import edu.aitu.oop3.db.entities.MenuItem;
-import edu.aitu.oop3.db.entities.Order;
-import edu.aitu.oop3.db.entities.OrderItem;
-import edu.aitu.oop3.db.entities.OrderStatus;
-import edu.aitu.oop3.db.exceptions.InvalidQuantityException;
-import edu.aitu.oop3.db.exceptions.OrderNotFoundException;
+import edu.aitu.oop3.db.entities.*;
+import edu.aitu.oop3.db.entities.orderType.*;
+import edu.aitu.oop3.db.exceptions.*;
 import edu.aitu.oop3.db.repositories.OrderRepository;
-
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-public class OrderService extends BaseService{
+public class OrderService {
     private final OrderRepository orderRepo;
     private final MenuService menuService;
     private final PaymentService paymentService;
@@ -24,41 +19,74 @@ public class OrderService extends BaseService{
         this.paymentService = paymentService;
     }
 
-    public long placeOrder(long customerId, List<OrderItem> itemsInput) {
-        log("Placing order for customer " + customerId);
-        if (itemsInput == null || itemsInput.isEmpty()) {
-            throw new InvalidQuantityException("Order must contain at least 1 item.");
-        }
+    public long placeOrder(long customerId, List<OrderItem> items, OrderType orderType) throws Exception {
+        System.out.println("[SERVICE] Placing order for customer " + customerId);
 
-        List<OrderItem> itemsToSave = new ArrayList<>();
-        BigDecimal total = BigDecimal.ZERO;
-
-        for (OrderItem it : itemsInput) {
-            if (it.getQuantity() <= 0) {
-                throw new InvalidQuantityException("Invalid quantity for menuItemId=" + it.getMenuItemId());
+        for (OrderItem item : items) {
+            MenuItem menu = menuService.getMenuItem(item.getMenuItemId());
+            if (menu == null) {
+                throw new MenuItemNotAvailableException("Menu item " + item.getMenuItemId() + " not found.");
             }
-
-            MenuItem menuItem = menuService.getAvailableMenuItemOrThrow(it.getMenuItemId());
-            it.setPriceAtOrder(menuItem.getPrice());
-
-            total = total.add(menuItem.getPrice().multiply(BigDecimal.valueOf(it.getQuantity())));
-            itemsToSave.add(it);
+            if (!menu.isAvailable()) {
+                throw new MenuItemNotAvailableException(menu.getName() + " is currently unavailable.");
+            }
+            if (item.getQuantity() <= 0) {
+                throw new InvalidQuantityException("Quantity must be positive.");
+            }
         }
 
-        paymentService.pay(total);
+        Order order = new Order();
+        order.setCustomerId(customerId);
+        order.setOrderDate(new Date());
+        order.setTotalAmount(BigDecimal.ZERO);
+        order.setStatus(OrderStatus.ACTIVE);
 
-        Order order = new Order(0, customerId, OrderStatus.ACTIVE, OffsetDateTime.now());
-        return orderRepo.createOrderWithItems(order, itemsToSave);
+        order.setOrderType(orderType.getType());
+
+        long orderId = orderRepo.createOrder(order);
+
+        for (OrderItem item : items) {
+            item.setOrderId(orderId);
+            orderRepo.addOrderItem(item);
+        }
+
+        BigDecimal total = calculateOrderTotal(orderId);
+        orderRepo.updateOrderTotal(orderId, total);
+
+        return orderId;
     }
 
     public List<Order> getActiveOrders() {
-        return orderRepo.findByStatus(OrderStatus.ACTIVE);
+        return orderRepo.getActiveOrders();
     }
 
-    public void markCompleted(long orderId) {
-        orderRepo.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException("Order not found: " + orderId));
+    public BigDecimal calculateOrderTotal(long orderId) {
+        List<OrderItem> items = orderRepo.getOrderItems(orderId);
+        BigDecimal total = BigDecimal.ZERO;
 
+        for (OrderItem item : items) {
+            MenuItem menu = menuService.getMenuItem(item.getMenuItemId());
+            BigDecimal price = menu.getPrice();
+            total = total.add(price.multiply(BigDecimal.valueOf(item.getQuantity())));
+        }
+        return total;
+    }
+
+    public BigDecimal calculateOrderTotalWithTax(long orderId) throws OrderNotFoundException {
+        Order order = orderRepo.getOrderById(orderId);
+        if (order == null) {
+            throw new OrderNotFoundException("Order " + orderId + " not found");
+        }
+
+        BigDecimal baseTotal = calculateOrderTotal(orderId);
+        return paymentService.calculateTotalWithTax(baseTotal);
+    }
+
+    public void markCompleted(long orderId) throws OrderNotFoundException {
+        Order order = orderRepo.getOrderById(orderId);
+        if (order == null) {
+            throw new OrderNotFoundException("Order not found: " + orderId);
+        }
         orderRepo.updateStatus(orderId, OrderStatus.COMPLETED);
     }
 }

@@ -1,9 +1,7 @@
 package edu.aitu.oop3.db.services;
 
 import edu.aitu.oop3.db.entities.MenuItem;
-import edu.aitu.oop3.db.exceptions.MenuItemNotAvailableException;
 import edu.aitu.oop3.db.repositories.MenuItemRepository;
-
 import java.util.List;
 
 public class MenuService {
@@ -14,16 +12,10 @@ public class MenuService {
     }
 
     public List<MenuItem> getAllMenu() {
-        return menuRepo.findAll();
+        return menuRepo.getAllMenuItems();
     }
 
-    public MenuItem getAvailableMenuItemOrThrow(long id) {
-        MenuItem item = menuRepo.findById(id)
-                .orElseThrow(() -> new MenuItemNotAvailableException("Menu item not found: " + id));
-
-        if (!item.isAvailable()) {
-            throw new MenuItemNotAvailableException("Menu item is not available: " + item.getName() + " (id=" + id + ")");
-        }
-        return item;
+    public MenuItem getMenuItem(long id) {
+        return menuRepo.getMenuItemById(id);
     }
 }

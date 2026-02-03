@@ -3,11 +3,9 @@ package edu.aitu.oop3.db.repositories.impl;
 import edu.aitu.oop3.db.database.IDB;
 import edu.aitu.oop3.db.entities.MenuItem;
 import edu.aitu.oop3.db.repositories.MenuItemRepository;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class MenuItemRepositoryImpl implements MenuItemRepository {
     private final IDB db;
@@ -17,47 +15,46 @@ public class MenuItemRepositoryImpl implements MenuItemRepository {
     }
 
     @Override
-    public List<MenuItem> findAll() {
-        String sql = "select id, name, price, available from menu_items order by id";
-        List<MenuItem> list = new ArrayList<>();
-
-        try (Connection con = db.getConnection();
-             PreparedStatement st = con.prepareStatement(sql);
-             ResultSet rs = st.executeQuery()) {
+    public List<MenuItem> getAllMenuItems() {
+        String sql = "SELECT * FROM menu_items";
+        List<MenuItem> items = new ArrayList<>();
+        try (Connection conn = db.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                list.add(new MenuItem(
+                items.add(new MenuItem(
                         rs.getLong("id"),
                         rs.getString("name"),
                         rs.getBigDecimal("price"),
                         rs.getBoolean("available")
                 ));
             }
-            return list;
-
         } catch (SQLException e) {
-            throw new RuntimeException("DB error: " + e.getMessage(), e);
+            System.out.println("Error fetching menu: " + e.getMessage());
         }
+        return items;
     }
 
     @Override
-    public Optional<MenuItem> findById(long id) {
-        String sql = "select id, name, price, available from menu_items where id = ?";
-        try (Connection con = db.getConnection();
-             PreparedStatement st = con.prepareStatement(sql)) {
+    public MenuItem getMenuItemById(long id) {
+        String sql = "SELECT * FROM menu_items WHERE id = ?";
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            st.setLong(1, id);
-            try (ResultSet rs = st.executeQuery()) {
-                if (!rs.next()) return Optional.empty();
-                return Optional.of(new MenuItem(
+            stmt.setLong(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new MenuItem(
                         rs.getLong("id"),
                         rs.getString("name"),
                         rs.getBigDecimal("price"),
                         rs.getBoolean("available")
-                ));
+                );
             }
         } catch (SQLException e) {
-            throw new RuntimeException("DB error: " + e.getMessage(), e);
+            System.out.println("Error fetching item by id: " + e.getMessage());
         }
+        return null;
     }
 }
