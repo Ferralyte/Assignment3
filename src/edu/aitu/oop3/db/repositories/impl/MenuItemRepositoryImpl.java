@@ -6,6 +6,7 @@ import edu.aitu.oop3.db.repositories.MenuItemRepository;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class MenuItemRepositoryImpl implements MenuItemRepository {
     private final IDB db;
@@ -56,5 +57,20 @@ public class MenuItemRepositoryImpl implements MenuItemRepository {
             System.out.println("Error fetching item by id: " + e.getMessage());
         }
         return null;
+    }
+
+    @Override
+    public List<MenuItem> findAll() {
+        return getAllMenuItems();
+    }
+
+    @Override
+    public Optional<MenuItem> findById(long id) {
+        return Optional.ofNullable(getMenuItemById(id));
+    }
+
+    @Override
+    public MenuItem save(MenuItem entity) {
+        return entity;
     }
 }
