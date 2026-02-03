@@ -1,7 +1,7 @@
 package edu.aitu.oop3.db.services;
 
 import edu.aitu.oop3.db.entities.*;
-import edu.aitu.oop3.db.entities.orderType.*;
+import edu.aitu.oop3.db.entities.orderType.OrderType;
 import edu.aitu.oop3.db.exceptions.*;
 import edu.aitu.oop3.db.repositories.OrderRepository;
 import java.math.BigDecimal;
@@ -35,13 +35,13 @@ public class OrderService {
             }
         }
 
-        Order order = new Order();
-        order.setCustomerId(customerId);
-        order.setOrderDate(new Date());
-        order.setTotalAmount(BigDecimal.ZERO);
-        order.setStatus(OrderStatus.ACTIVE);
-
-        order.setOrderType(orderType.getType());
+        Order order = new OrderBuilder()
+                .setCustomerId(customerId)
+                .setOrderDate(new Date())
+                .setTotalAmount(BigDecimal.ZERO)
+                .setStatus(OrderStatus.ACTIVE)
+                .setOrderType(orderType.getType())
+                .build();
 
         long orderId = orderRepo.createOrder(order);
 
