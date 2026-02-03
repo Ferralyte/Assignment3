@@ -1,6 +1,6 @@
 import edu.aitu.oop3.db.entities.*;
 import edu.aitu.oop3.db.database.*;
-import edu.aitu.oop3.db.entities.orderType.OrderType;
+import edu.aitu.oop3.db.entities.orderType.*;
 import edu.aitu.oop3.db.exceptions.*;
 import edu.aitu.oop3.db.repositories.*;
 import edu.aitu.oop3.db.repositories.impl.*;
