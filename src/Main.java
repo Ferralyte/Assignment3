@@ -1,24 +1,9 @@
-import edu.aitu.oop3.db.database.IDB;
-import edu.aitu.oop3.db.database.PostgresDB;
-
-import edu.aitu.oop3.db.entities.Order;
-import edu.aitu.oop3.db.entities.OrderItem;
-import edu.aitu.oop3.db.entities.OrderStatus;
-import edu.aitu.oop3.db.entities.MenuItem;
-
-import edu.aitu.oop3.db.exceptions.InvalidQuantityException;
-import edu.aitu.oop3.db.exceptions.MenuItemNotAvailableException;
-import edu.aitu.oop3.db.exceptions.OrderNotFoundException;
-
-import edu.aitu.oop3.db.repositories.MenuItemRepository;
-import edu.aitu.oop3.db.repositories.OrderRepository;
-
-import edu.aitu.oop3.db.repositories.impl.MenuItemRepositoryImpl;
-import edu.aitu.oop3.db.repositories.impl.OrderRepositoryImpl;
-
-import edu.aitu.oop3.db.services.MenuService;
-import edu.aitu.oop3.db.services.OrderService;
-import edu.aitu.oop3.db.services.PaymentService;
+import edu.aitu.oop3.db.database.*;
+import edu.aitu.oop3.db.entities.*;
+import edu.aitu.oop3.db.exceptions.*;
+import edu.aitu.oop3.db.repositories.*;
+import edu.aitu.oop3.db.repositories.impl.*;
+import edu.aitu.oop3.db.services.*;
 
 import java.util.*;
 
@@ -90,7 +75,7 @@ public class Main {
                 }
 
             } catch (InvalidQuantityException | MenuItemNotAvailableException | OrderNotFoundException e) {
-                System.out.println("Business error: " + e.getMessage());
+                System.out.println("Error : " + e.getMessage());
             } catch (Exception e) {
                 System.out.println("Error: " + e.getMessage());
 

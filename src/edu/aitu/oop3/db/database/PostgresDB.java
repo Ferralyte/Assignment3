@@ -6,10 +6,12 @@ import java.sql.SQLException;
 public class PostgresDB implements IDB {
     @Override
     public Connection getConnection() {
-        try {
-            return DatabaseConnection.getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to connect to database", e);
+
+        Connection conn = DatabaseConnection.getInstance().getConnection();
+
+        if (conn == null) {
+            System.err.println("Error: Connection is null. Check console for previous errors.");
         }
+        return conn;
     }
 }
