@@ -5,12 +5,10 @@ import edu.aitu.oop3.db.entities.Order;
 import edu.aitu.oop3.db.entities.OrderItem;
 import edu.aitu.oop3.db.entities.OrderStatus;
 import edu.aitu.oop3.db.repositories.OrderRepository;
-
+import java.math.BigDecimal;
 import java.sql.*;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class OrderRepositoryImpl implements OrderRepository {
     private final IDB db;
@@ -20,108 +18,137 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public long createOrderWithItems(Order order, List<OrderItem> items) {
-        String insertOrder = "insert into orders(customer_id, status) values (?, ?) returning id";
-        String insertItem = "insert into order_items(order_id, menu_item_id, quantity, price_at_order) values (?, ?, ?, ?)";
+    public long createOrder(Order order) {
+        String sql = "INSERT INTO orders (customer_id, order_date, total_amount, status, order_type) VALUES (?, ?, ?, ?, ?) RETURNING id";
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-        try (Connection con = db.getConnection()) {
-            con.setAutoCommit(false);
+            stmt.setLong(1, order.getCustomerId());
+            stmt.setDate(2, new java.sql.Date(order.getOrderDate().getTime()));
+            stmt.setBigDecimal(3, order.getTotalAmount());
+            stmt.setString(4, order.getStatus().name());
+            stmt.setString(5, order.getOrderType());
 
-            long orderId;
-            try (PreparedStatement st = con.prepareStatement(insertOrder)) {
-                st.setLong(1, order.getCustomerId());
-                st.setString(2, order.getStatus().name());
-                try (ResultSet rs = st.executeQuery()) {
-                    rs.next();
-                    orderId = rs.getLong(1);
-                }
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getLong("id");
             }
-
-            try (PreparedStatement st = con.prepareStatement(insertItem)) {
-                for (OrderItem it : items) {
-                    st.setLong(1, orderId);
-                    st.setLong(2, it.getMenuItemId());
-                    st.setInt(3, it.getQuantity());
-                    st.setBigDecimal(4, it.getPriceAtOrder());
-                    st.addBatch();
-                }
-                st.executeBatch();
-            }
-
-            con.commit();
-            con.setAutoCommit(true);
-            return orderId;
-
         } catch (SQLException e) {
-            throw new RuntimeException("DB error while creating order: " + e.getMessage(), e);
+            System.out.println("Error creating order: " + e.getMessage());
+        }
+        return -1;
+    }
+
+    @Override
+    public void addOrderItem(OrderItem item) {
+        String sql = "INSERT INTO order_items (order_id, menu_item_id, quantity) VALUES (?, ?, ?)";
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setLong(1, item.getOrderId());
+            stmt.setLong(2, item.getMenuItemId());
+            stmt.setInt(3, item.getQuantity());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error adding item: " + e.getMessage());
         }
     }
 
     @Override
-    public List<Order> findByStatus(OrderStatus status) {
-        String sql = "select id, customer_id, status, created_at from orders where status = ? order by id desc";
-        List<Order> list = new ArrayList<>();
+    public List<Order> getActiveOrders() {
+        String sql = "SELECT * FROM orders WHERE status = 'ACTIVE'";
+        List<Order> orders = new ArrayList<>();
+        try (Connection conn = db.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
 
-        try (Connection con = db.getConnection();
-             PreparedStatement st = con.prepareStatement(sql)) {
-
-            st.setString(1, status.name());
-            try (ResultSet rs = st.executeQuery()) {
-                while (rs.next()) {
-                    list.add(new Order(
-                            rs.getLong("id"),
-                            rs.getLong("customer_id"),
-                            OrderStatus.valueOf(rs.getString("status")),
-                            rs.getObject("created_at", OffsetDateTime.class)
-                    ));
-                }
+            while (rs.next()) {
+                Order order = new Order();
+                order.setId(rs.getLong("id"));
+                order.setCustomerId(rs.getLong("customer_id"));
+                order.setOrderDate(rs.getDate("order_date"));
+                order.setTotalAmount(rs.getBigDecimal("total_amount"));
+                order.setStatus(OrderStatus.valueOf(rs.getString("status")));
+                order.setOrderType(rs.getString("order_type"));
+                orders.add(order);
             }
-            return list;
-
         } catch (SQLException e) {
-            throw new RuntimeException("DB error: " + e.getMessage(), e);
+            System.out.println("Error fetching orders: " + e.getMessage());
         }
+        return orders;
     }
 
     @Override
-    public Optional<Order> findById(long id) {
-        String sql = "select id, customer_id, status, created_at from orders where id = ?";
-        try (Connection con = db.getConnection();
-             PreparedStatement st = con.prepareStatement(sql)) {
+    public Order getOrderById(long id) {
+        String sql = "SELECT * FROM orders WHERE id = ?";
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            st.setLong(1, id);
-            try (ResultSet rs = st.executeQuery()) {
-                if (!rs.next()) return Optional.empty();
+            stmt.setLong(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                Order order = new Order();
+                order.setId(rs.getLong("id"));
+                order.setCustomerId(rs.getLong("customer_id"));
+                order.setOrderDate(rs.getDate("order_date"));
+                order.setTotalAmount(rs.getBigDecimal("total_amount"));
+                order.setStatus(OrderStatus.valueOf(rs.getString("status")));
+                order.setOrderType(rs.getString("order_type"));
+                return order;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting order: " + e.getMessage());
+        }
+        return null;
+    }
 
-                return Optional.of(new Order(
+    @Override
+    public List<OrderItem> getOrderItems(long orderId) {
+        String sql = "SELECT * FROM order_items WHERE order_id = ?";
+        List<OrderItem> items = new ArrayList<>();
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setLong(1, orderId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                items.add(new OrderItem(
                         rs.getLong("id"),
-                        rs.getLong("customer_id"),
-                        OrderStatus.valueOf(rs.getString("status")),
-                        rs.getObject("created_at", OffsetDateTime.class)
+                        rs.getLong("order_id"),
+                        rs.getLong("menu_item_id"),
+                        rs.getInt("quantity"),
+                        null
                 ));
             }
-
         } catch (SQLException e) {
-            throw new RuntimeException("DB error: " + e.getMessage(), e);
+            System.out.println("Error fetching items: " + e.getMessage());
+        }
+        return items;
+    }
+
+    @Override
+    public void updateOrderTotal(long orderId, BigDecimal newTotal) {
+        String sql = "UPDATE orders SET total_amount = ? WHERE id = ?";
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setBigDecimal(1, newTotal);
+            stmt.setLong(2, orderId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error updating total: " + e.getMessage());
         }
     }
 
     @Override
-    public void updateStatus(long orderId, OrderStatus newStatus) {
-        String sql = "update orders set status = ? where id = ?";
-        try (Connection con = db.getConnection();
-             PreparedStatement st = con.prepareStatement(sql)) {
-
-            st.setString(1, newStatus.name());
-            st.setLong(2, orderId);
-
-            int updated = st.executeUpdate();
-            if (updated == 0) {
-                throw new RuntimeException("Order not found in DB for update: " + orderId);
-            }
-
+    public void updateStatus(long orderId, OrderStatus status) {
+        String sql = "UPDATE orders SET status = ? WHERE id = ?";
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, status.name());
+            stmt.setLong(2, orderId);
+            stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("DB error: " + e.getMessage(), e);
+            System.out.println("Error updating status: " + e.getMessage());
         }
     }
 }
