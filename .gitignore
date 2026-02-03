@@ -28,3 +28,6 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+### User Configuration & Secrets ###
+config.properties
+**/config.properties
