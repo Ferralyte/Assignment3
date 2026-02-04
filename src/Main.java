@@ -40,7 +40,7 @@ public class Main {
             try {
                 if (choice.equals("1")) {
                     List<MenuItem> menu = menuService.getAllMenu();
-                    menu.forEach(System.out::println);
+                    menu.forEach(item -> System.out.println(item));
 
                 } else if (choice.equals("2")) {
                     System.out.print("Customer ID: ");
