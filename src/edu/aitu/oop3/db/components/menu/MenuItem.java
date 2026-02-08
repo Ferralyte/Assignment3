@@ -2,7 +2,7 @@ package edu.aitu.oop3.db.components.menu;
 
 import java.math.BigDecimal;
 
-public class MenuItem {
+public class MenuItem { 
     private long id;
     private String name;
     private BigDecimal price;
