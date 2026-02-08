@@ -1,4 +1,4 @@
-package edu.aitu.oop3.db.services;
+package edu.aitu.oop3.db.commonInfrastructure.services;
 
 public abstract class BaseService {
     protected void log(String message) {
