@@ -1,4 +1,4 @@
-package edu.aitu.oop3.db.services;
+package edu.aitu.oop3.db.components.billing;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

@@ -1,4 +1,4 @@
-package edu.aitu.oop3.db.database;
+package edu.aitu.oop3.db.commonInfrastructure.database;
 
 import java.sql.Connection;
 
