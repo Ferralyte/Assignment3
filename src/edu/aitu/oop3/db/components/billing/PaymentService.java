@@ -24,6 +24,6 @@ public class PaymentService {
         BigDecimal taxAmount = baseAmount.multiply(TAX_RATE);
         BigDecimal total = baseAmount.add(taxAmount);
 
-        return total.setScale(2, RoundingMode.HALF_UP);
+        return total.setScale( 2, RoundingMode.HALF_UP);
     }
 }
