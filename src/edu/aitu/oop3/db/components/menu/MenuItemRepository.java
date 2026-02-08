@@ -1,6 +1,7 @@
-package edu.aitu.oop3.db.repositories;
+package edu.aitu.oop3.db.components.menu;
 
-import edu.aitu.oop3.db.entities.MenuItem;
+import edu.aitu.oop3.db.commonInfrastructure.repository.Repository;
+
 import java.util.List;
 
 public interface MenuItemRepository extends Repository<MenuItem> {
