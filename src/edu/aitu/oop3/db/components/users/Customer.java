@@ -1,4 +1,4 @@
-package edu.aitu.oop3.db.entities;
+package edu.aitu.oop3.db.components.users;
 
 public class Customer {
     private long id;
