@@ -1,4 +1,4 @@
-package edu.aitu.oop3.db.repositories;
+package edu.aitu.oop3.db.commonInfrastructure.repository;
 
 import java.util.List;
 import java.util.Optional;
