@@ -1,6 +1,4 @@
-package edu.aitu.oop3.db.factory;
-
-import edu.aitu.oop3.db.entities.orderType.*;
+package edu.aitu.oop3.db.components.delivery;
 
 public class OrderTypeFactory {
 

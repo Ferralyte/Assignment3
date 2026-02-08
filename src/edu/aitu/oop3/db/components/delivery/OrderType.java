@@ -1,4 +1,4 @@
-package edu.aitu.oop3.db.entities.orderType;
+package edu.aitu.oop3.db.components.delivery;
 
 public interface OrderType {
     String getType();
