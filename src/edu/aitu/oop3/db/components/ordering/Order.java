@@ -1,4 +1,4 @@
-package edu.aitu.oop3.db.entities;
+package edu.aitu.oop3.db.components.ordering;
 
 import java.math.BigDecimal;
 import java.util.Date;

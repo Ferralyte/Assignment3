@@ -1,8 +1,7 @@
-package edu.aitu.oop3.db.repositories.impl;
+package edu.aitu.oop3.db.components.menu;
 
-import edu.aitu.oop3.db.database.IDB;
-import edu.aitu.oop3.db.entities.MenuItem;
-import edu.aitu.oop3.db.repositories.MenuItemRepository;
+import edu.aitu.oop3.db.commonInfrastructure.database.IDB;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

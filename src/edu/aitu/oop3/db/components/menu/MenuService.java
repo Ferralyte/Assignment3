@@ -1,7 +1,5 @@
-package edu.aitu.oop3.db.services;
+package edu.aitu.oop3.db.components.menu;
 
-import edu.aitu.oop3.db.entities.MenuItem;
-import edu.aitu.oop3.db.repositories.MenuItemRepository;
 import java.util.List;
 
 public class MenuService {
