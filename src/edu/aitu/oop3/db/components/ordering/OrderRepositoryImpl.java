@@ -1,10 +1,7 @@
-package edu.aitu.oop3.db.repositories.impl;
+package edu.aitu.oop3.db.components.ordering;
 
-import edu.aitu.oop3.db.database.IDB;
-import edu.aitu.oop3.db.entities.Order;
-import edu.aitu.oop3.db.entities.OrderItem;
-import edu.aitu.oop3.db.entities.OrderStatus;
-import edu.aitu.oop3.db.repositories.OrderRepository;
+import edu.aitu.oop3.db.commonInfrastructure.database.IDB;
+
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;

@@ -1,8 +1,5 @@
-package edu.aitu.oop3.db.repositories;
+package edu.aitu.oop3.db.components.ordering;
 
-import edu.aitu.oop3.db.entities.Order;
-import edu.aitu.oop3.db.entities.OrderItem;
-import edu.aitu.oop3.db.entities.OrderStatus;
 import java.math.BigDecimal;
 import java.util.List;
 
