@@ -7,7 +7,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-public class DatabaseConnection {
+public class DatabaseConnection { 
     private static DatabaseConnection instance;
     private Connection connection;
     private String url, user, password;
