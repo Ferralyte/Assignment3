@@ -1,11 +1,9 @@
-import edu.aitu.oop3.db.entities.*;
-import edu.aitu.oop3.db.database.*;
-import edu.aitu.oop3.db.entities.orderType.*;
-import edu.aitu.oop3.db.exceptions.*;
-import edu.aitu.oop3.db.repositories.*;
-import edu.aitu.oop3.db.repositories.impl.*;
-import edu.aitu.oop3.db.services.*;
-import edu.aitu.oop3.db.factory.OrderTypeFactory;
+import edu.aitu.oop3.db.components.delivery.OrderType;
+import edu.aitu.oop3.db.components.menu.*;
+import edu.aitu.oop3.db.components.ordering.*;
+import edu.aitu.oop3.db.components.billing.PaymentService;
+import edu.aitu.oop3.db.commonInfrastructure.database.*;
+import edu.aitu.oop3.db.components.delivery.OrderTypeFactory;
 import java.util.*;
 import java.math.BigDecimal;
 
